@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch and Bound TSP Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tsp.css">
 </head>
 <body>
     <div class="game-container">
@@ -18,6 +18,12 @@
             <input type="number" id="numCities" min="2" max="10" value="5">
             <button id="startButton">Start Game</button>
         </div>
+        <div id="game-stats" class="game-stats">
+            <div class="stat-item">Time: 00:00</div>
+            <div class="stat-item">Score: 0</div>
+            <div class="stat-item">Paths Found: 0</div>
+            <div class="stat-item">High Score: 0</div>
+        </div>
         <div id="matrix-container"></div>
         <canvas id="gameCanvas"></canvas>
         <div class="controls">
@@ -27,6 +33,6 @@
         </div>
         <div id="feedback" class="feedback"></div>
     </div>
-    <script src="script.js"></script>
+    <script src="tsp.js"></script>
 </body>
 </html>

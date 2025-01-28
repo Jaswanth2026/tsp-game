@@ -97,7 +97,9 @@ canvas {
 }
 
 .feedback.success {
-    background-color: rgba(40, 167, 69, 0.2);
+    background-color: rgba(32, 201, 151, 0.2);
+    border: 1px solid #20c997;
+    white-space: pre-line;
 }
 
 .feedback.error {
@@ -152,4 +154,61 @@ canvas {
     background-color: #ffcc00;
     border-color: #ff9900;
     box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+}
+
+.game-stats {
+    display: flex;
+    justify-content: space-around;
+    background-color: #1c2025;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.stat-item {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #20c997;
+    padding: 0.5rem 1rem;
+    background-color: #333a41;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.stats-card {
+    background-color: #1c2025;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #333a41;
+}
+
+.stats-row:last-child {
+    border-bottom: none;
+}
+
+.stats-label {
+    color: #adb5bd;
+    font-weight: 500;
+}
+
+.stats-value {
+    color: #20c997;
+    font-weight: bold;
+}
+
+.stats-header {
+    color: #20c997;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
 }

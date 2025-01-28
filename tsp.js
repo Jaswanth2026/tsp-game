@@ -9,13 +9,22 @@ class TSPGame {
         this.bestCost = Infinity;
         this.optimalPath = null;
         this.optimalCost = Infinity;
+        this.timer = null;
+        this.startTime = null;
+        this.score = 0;
+        this.isGameActive = false;
+        this.correctPaths = 0;
+        this.usedHint = false;
+        this.usedOptimal = false;
+        this.gameCompleted = false;
+        this.highScore = localStorage.getItem('tspHighScore') || 0;
 
-        // Initialize canvas and event listeners
+        
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
         this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
 
-        // Initialize button listeners
+       
         document.getElementById('startButton').addEventListener('click', () => this.startGame());
         document.getElementById('resetButton').addEventListener('click', () => this.resetPath());
         document.getElementById('hintButton').addEventListener('click', () => this.requestHint());
@@ -35,7 +44,7 @@ class TSPGame {
             return;
         }
 
-        // Generate random cities
+        
         this.cities = [];
         for (let i = 0; i < numCities; i++) {
             this.cities.push({
@@ -45,11 +54,11 @@ class TSPGame {
             });
         }
 
-        // Generate distances with some infinite paths
+        
         this.distances = Array(numCities).fill().map(() => Array(numCities).fill(Infinity));
         for (let i = 0; i < numCities; i++) {
             for (let j = i + 1; j < numCities; j++) {
-                // 70% chance of having a direct path
+               
                 if (Math.random() < 0.7) {
                     const distance = Math.round(this.calculateDistance(this.cities[i], this.cities[j]));
                     this.distances[i][j] = distance;
@@ -59,8 +68,7 @@ class TSPGame {
             this.distances[i][i] = 0;
         }
 
-        // Ensure the graph is connected and has a valid solution
-        this.ensureConnectedGraph();
+       this.ensureConnectedGraph();
 
         this.currentPath = [];
         this.bestPath = null;
@@ -69,6 +77,18 @@ class TSPGame {
         this.createDistanceMatrix();
         this.render();
         this.showFeedback('Click on cities to create your path. Only directly connected cities can be visited consecutively.', 'info');
+
+        
+        this.stopTimer();
+        this.startTime = new Date();
+        this.isGameActive = true;
+        this.score = 0;
+        this.correctPaths = 0;
+        this.usedHint = false;
+        this.usedOptimal = false;
+        this.gameCompleted = false;
+        this.timer = setInterval(() => this.updateTimer(), 1000);
+        this.updateScoreDisplay();
     }
 
     ensureConnectedGraph() {
@@ -84,10 +104,10 @@ class TSPGame {
             }
         };
 
-        // Initial DFS to check connectivity
+        
         visit(0);
 
-        // Add missing connections if not fully connected
+        
         if (visited.size !== n) {
             for (let i = 0; i < n; i++) {
                 if (!visited.has(i)) {
@@ -99,7 +119,7 @@ class TSPGame {
             }
         }
 
-        // Ensure there exists at least one Hamiltonian cycle
+        
         const hamiltonianPath = this.generateHamiltonianCycle();
         for (let i = 0; i < hamiltonianPath.length; i++) {
             const from = hamiltonianPath[i];
@@ -113,7 +133,6 @@ class TSPGame {
     }
 
     generateHamiltonianCycle() {
-        // Generate a simple Hamiltonian cycle (A → B → C → ... → A)
         const n = this.cities.length;
         const cycle = [];
         for (let i = 0; i < n; i++) {
@@ -133,13 +152,13 @@ class TSPGame {
         container.innerHTML = '';
         container.style.gridTemplateColumns = `repeat(${this.cities.length + 1}, auto)`;
 
-        // Add header row
+        
         container.appendChild(this.createMatrixCell(''));
         for (let i = 0; i < this.cities.length; i++) {
             container.appendChild(this.createMatrixCell(this.cities[i].label));
         }
 
-        // Add matrix rows
+       
         for (let i = 0; i < this.cities.length; i++) {
             container.appendChild(this.createMatrixCell(this.cities[i].label));
             for (let j = 0; j < this.cities.length; j++) {
@@ -203,13 +222,65 @@ class TSPGame {
 
     checkSolution() {
         const totalDistance = this.calculatePathDistance(this.currentPath);
-        if (totalDistance < this.bestCost) {
+        if (totalDistance < this.bestCost || this.bestCost === Infinity) {
             this.bestCost = totalDistance;
             this.bestPath = [...this.currentPath];
-            this.showFeedback(`New best path found! Distance: ${Math.round(totalDistance)}`, 'success');
+            this.correctPaths++;
+            
+            
+            let pathPoints = 10 * this.correctPaths;
+            
+           
+            let bonusPoints = 0;
+            if (!this.usedHint && !this.usedOptimal) {
+                bonusPoints = 50;
+            }
+            
+            this.score = pathPoints + bonusPoints;
+            
+            if (this.score > this.highScore) {
+                this.highScore = this.score;
+                localStorage.setItem('tspHighScore', this.score);
+            }
+
+            if (!this.gameCompleted && totalDistance === this.optimalCost) {
+                this.gameCompleted = true;
+                const finalTime = this.getFinalTimeString();
+                this.stopTimer();
+                this.showGameComplete(finalTime, {
+                    distance: Math.round(totalDistance),
+                    pathPoints,
+                    bonusPoints,
+                    totalScore: this.score
+                });
+            } else {
+                const statsHtml = `
+                    <div class="stats-card">
+                        <div class="stats-header">New Path Found!</div>
+                        <div class="stats-row">
+                            <span class="stats-label">Distance:</span>
+                            <span class="stats-value">${Math.round(totalDistance)}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label">Path Points:</span>
+                            <span class="stats-value">${pathPoints}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label">Bonus Points:</span>
+                            <span class="stats-value">${bonusPoints}</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="stats-label">Total Score:</span>
+                            <span class="stats-value">${this.score}</span>
+                        </div>
+                    </div>
+                `;
+                this.showFeedback(statsHtml, 'success');
+            }
         } else {
-            this.showFeedback(`Path distance: ${Math.round(totalDistance)}`, 'info');
+            this.showFeedback(`Valid path found! Distance: ${Math.round(totalDistance)}. Try to find a shorter path!`, 'info');
         }
+        this.updateScoreDisplay();
     }
 
     calculatePathDistance(path) {
@@ -261,6 +332,7 @@ class TSPGame {
     }
 
     showOptimalSolution() {
+        this.usedOptimal = true;
         if (this.optimalPath) {
             this.currentPath = [...this.optimalPath];
             this.render();
@@ -272,9 +344,11 @@ class TSPGame {
         this.currentPath = [];
         this.render();
         this.showFeedback('Path reset', 'info');
+        this.updateScoreDisplay();
     }
 
     requestHint() {
+        this.usedHint = true;
         if (!this.cities.length) return;
 
         let hint;
@@ -299,19 +373,62 @@ class TSPGame {
         this.showFeedback(hint, 'info');
     }
 
+    showGameComplete(finalTime, stats) {
+        const statsHtml = `
+            <div class="stats-card">
+                <div class="stats-header">${this.usedHint || this.usedOptimal ? 'Congratulations!' : 'Perfect Game!'}</div>
+                <div class="stats-row">
+                    <span class="stats-label">Time Taken:</span>
+                    <span class="stats-value">${finalTime}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Final Distance:</span>
+                    <span class="stats-value">${stats.distance}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Path Points:</span>
+                    <span class="stats-value">${stats.pathPoints}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Bonus Points:</span>
+                    <span class="stats-value">${stats.bonusPoints}</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Final Score:</span>
+                    <span class="stats-value">${stats.totalScore}</span>
+                </div>
+            </div>
+        `;
+        this.showFeedback(statsHtml, 'success');
+    }
+
+    getFinalTimeString() {
+        if (!this.startTime) return '00:00';
+        const currentTime = new Date();
+        const elapsedSeconds = Math.floor((currentTime - this.startTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
     showFeedback(message, type) {
         const feedback = document.getElementById('feedback');
-        feedback.textContent = message;
+        
+        if (message.includes('<div')) {
+            feedback.innerHTML = message;
+        } else {
+            feedback.textContent = message;
+        }
         feedback.className = `feedback ${type}`;
     }
 
     render() {
         if (!this.ctx) return;
 
-        // Clear canvas
+        
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw edges (connections between cities)
+        
         this.ctx.strokeStyle = '#4a5568';
         this.ctx.lineWidth = 1;
         for (let i = 0; i < this.cities.length; i++) {
@@ -325,7 +442,7 @@ class TSPGame {
             }
         }
 
-        // Draw current path
+       
         if (this.currentPath.length > 0) {
             this.ctx.strokeStyle = '#20c997';
             this.ctx.lineWidth = 3;
@@ -343,26 +460,25 @@ class TSPGame {
             this.ctx.stroke();
         }
 
-        // Draw cities
+        
         for (const city of this.cities) {
-            // Check if the city is in the current path and highlight
             const isSelected = this.currentPath.includes(this.cities.indexOf(city));
 
-            const radius = 12; // Increased size of the node
+            const radius = 12; 
             this.ctx.beginPath();
             this.ctx.arc(city.x, city.y, radius, 0, 2 * Math.PI);
 
             if (isSelected) {
-                this.ctx.fillStyle = '#20c997'; // Highlighted color when selected
+                this.ctx.fillStyle = '#20c997';
             } else {
-                this.ctx.fillStyle = '#1e40af'; // Default color
+                this.ctx.fillStyle = '#1e40af';
             }
             this.ctx.fill();
             this.ctx.strokeStyle = '#000';
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
 
-            // Draw labels
+            
             this.ctx.fillStyle = '#fff';
             this.ctx.font = '14px Arial';
             this.ctx.textAlign = 'center';
@@ -370,7 +486,37 @@ class TSPGame {
             this.ctx.fillText(city.label, city.x, city.y);
         }
     }
+
+    updateTimer() {
+        if (!this.isGameActive || !this.startTime) return;
+        
+        const timeString = this.getFinalTimeString();
+        this.updateScoreDisplay(timeString);
+    }
+
+    updateScoreDisplay(timeString = '00:00') {
+        const scoreDisplay = document.getElementById('game-stats');
+        scoreDisplay.innerHTML = `
+            <div class="stat-item">Time: ${timeString}</div>
+            <div class="stat-item">Score: ${this.score}</div>
+            <div class="stat-item">Paths Found: ${this.correctPaths}</div>
+            <div class="stat-item">High Score: ${this.highScore}</div>
+        `;
+    }
+
+    stopTimer() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        this.isGameActive = false;
+        
+        
+        if (this.startTime) {
+            const finalTime = this.getFinalTimeString();
+            this.updateScoreDisplay(finalTime);
+        }
+    }
 }
 
-// Initialize the game
 const game = new TSPGame();
