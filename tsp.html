@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch and Bound TSP Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Traveling Salesman Game</h1>
+        <div class="info-text">
+            Find the shortest possible route visiting all cities and returning to the start.
+            Not all cities are directly connected - check the distance matrix!
+        </div>
+        <div class="input-container">
+            <label for="numCities">Number of Cities:</label>
+            <input type="number" id="numCities" min="2" max="10" value="5">
+            <button id="startButton">Start Game</button>
+        </div>
+        <div id="matrix-container"></div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="controls">
+            <button id="resetButton">Reset Path</button>
+            <button id="hintButton">Hint</button>
+            <button id="solutionButton" class="solution-btn">Show Optimal Solution</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

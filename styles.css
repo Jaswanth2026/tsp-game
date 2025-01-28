@@ -1,0 +1,109 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #2a2d34;
+    color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.game-container {
+    background-color: #333a41;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+}
+
+.info-text {
+    color: #adb5bd;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+h1 {
+    color: #20c997;
+    margin-bottom: 15px;
+}
+
+.input-container {
+    margin-bottom: 20px;
+}
+
+input[type="number"] {
+    width: 50px;
+    padding: 5px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #20c997;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+button.solution-btn {
+    background-color: #228be6;
+}
+
+#matrix-container {
+    margin: 20px auto;
+    display: grid;
+    justify-content: center;
+    gap: 5px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 10px;
+}
+
+#matrix-container div {
+    padding: 5px 10px;
+    background-color: #1c2025;
+    border-radius: 4px;
+    min-width: 30px;
+}
+
+canvas {
+    background-color: #1c2025;
+    border-radius: 8px;
+    margin: 20px auto;
+    display: block;
+    width: 100%;
+    height: 400px;
+}
+
+.feedback {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.feedback.success {
+    background-color: rgba(40, 167, 69, 0.2);
+}
+
+.feedback.error {
+    background-color: rgba(220, 53, 69, 0.2);
+}
+
+.feedback.info {
+    background-color: rgba(13, 110, 253, 0.2);
+}
