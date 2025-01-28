@@ -107,3 +107,49 @@ canvas {
 .feedback.info {
     background-color: rgba(13, 110, 253, 0.2);
 }
+
+.timer-display {
+    background-color: #1c2025;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-size: 1.2em;
+    color: #20c997;
+    font-weight: bold;
+}
+
+.score-display {
+    background-color: #1c2025;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-size: 1.2em;
+    color: #20c997;
+}
+
+/* New Styles for Nodes */
+.city-node {
+    width: 30px;
+    height: 30px;
+    background-color: #1e40af;
+    border-radius: 50%;
+    border: 2px solid #000;
+    cursor: pointer;
+    position: absolute;
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 30px;
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+}
+
+.city-node:hover {
+    transform: scale(1.2);
+}
+
+.city-node.selected {
+    background-color: #ffcc00;
+    border-color: #ff9900;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+}

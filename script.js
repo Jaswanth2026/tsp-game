@@ -9,7 +9,7 @@ class TSPGame {
         this.bestCost = Infinity;
         this.optimalPath = null;
         this.optimalCost = Infinity;
-        
+
         // Initialize canvas and event listeners
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
@@ -59,7 +59,7 @@ class TSPGame {
             this.distances[i][i] = 0;
         }
 
-        // Ensure the graph is connected
+        // Ensure the graph is connected and has a valid solution
         this.ensureConnectedGraph();
 
         this.currentPath = [];
@@ -74,7 +74,7 @@ class TSPGame {
     ensureConnectedGraph() {
         const n = this.cities.length;
         const visited = new Set();
-        
+
         const visit = (city) => {
             visited.add(city);
             for (let i = 0; i < n; i++) {
@@ -84,8 +84,10 @@ class TSPGame {
             }
         };
 
+        // Initial DFS to check connectivity
         visit(0);
-        
+
+        // Add missing connections if not fully connected
         if (visited.size !== n) {
             for (let i = 0; i < n; i++) {
                 if (!visited.has(i)) {
@@ -96,6 +98,28 @@ class TSPGame {
                 }
             }
         }
+
+        // Ensure there exists at least one Hamiltonian cycle
+        const hamiltonianPath = this.generateHamiltonianCycle();
+        for (let i = 0; i < hamiltonianPath.length; i++) {
+            const from = hamiltonianPath[i];
+            const to = hamiltonianPath[(i + 1) % n];
+            if (this.distances[from][to] === Infinity) {
+                const distance = Math.round(this.calculateDistance(this.cities[from], this.cities[to]));
+                this.distances[from][to] = distance;
+                this.distances[to][from] = distance;
+            }
+        }
+    }
+
+    generateHamiltonianCycle() {
+        // Generate a simple Hamiltonian cycle (A → B → C → ... → A)
+        const n = this.cities.length;
+        const cycle = [];
+        for (let i = 0; i < n; i++) {
+            cycle.push(i);
+        }
+        return cycle;
     }
 
     calculateDistance(city1, city2) {
@@ -206,8 +230,8 @@ class TSPGame {
 
         const bound = (path, cost, visited) => {
             if (path.length === n) {
-                if (this.distances[path[n-1]][path[0]] !== Infinity) {
-                    const totalCost = cost + this.distances[path[n-1]][path[0]];
+                if (this.distances[path[n - 1]][path[0]] !== Infinity) {
+                    const totalCost = cost + this.distances[path[n - 1]][path[0]];
                     if (totalCost < minCost) {
                         minCost = totalCost;
                         optimalPath = [...path];
@@ -261,7 +285,7 @@ class TSPGame {
         } else {
             const lastCity = this.currentPath[this.currentPath.length - 1];
             const availableCities = this.cities
-                .map((city, index) => ({index, distance: this.distances[lastCity][index]}))
+                .map((city, index) => ({ index, distance: this.distances[lastCity][index] }))
                 .filter(city => !this.currentPath.includes(city.index) && city.distance !== Infinity)
                 .sort((a, b) => a.distance - b.distance);
 
@@ -308,37 +332,38 @@ class TSPGame {
             this.ctx.beginPath();
             const firstCity = this.cities[this.currentPath[0]];
             this.ctx.moveTo(firstCity.x, firstCity.y);
-
-            for (let i = 1; i < this.currentPath.length; i++) {
-                const city = this.cities[this.currentPath[i]];
+            for (const index of this.currentPath) {
+                const city = this.cities[index];
                 this.ctx.lineTo(city.x, city.y);
             }
-
-            // If path is complete, connect back to start
             if (this.currentPath.length === this.cities.length) {
-                const lastCity = this.currentPath[this.currentPath.length - 1];
-                if (this.distances[lastCity][this.currentPath[0]] !== Infinity) {
-                    this.ctx.lineTo(firstCity.x, firstCity.y);
-                }
+                const startCity = this.cities[this.currentPath[0]];
+                this.ctx.lineTo(startCity.x, startCity.y);
             }
             this.ctx.stroke();
         }
 
         // Draw cities
-        for (let i = 0; i < this.cities.length; i++) {
-            const city = this.cities[i];
-            
-            // Draw city circle
+        for (const city of this.cities) {
+            // Check if the city is in the current path and highlight
+            const isSelected = this.currentPath.includes(this.cities.indexOf(city));
+
+            const radius = 12; // Increased size of the node
             this.ctx.beginPath();
-            this.ctx.arc(city.x, city.y, 15, 0, Math.PI * 2);
-            this.ctx.fillStyle = this.currentPath.includes(i) ? '#20c997' : '#ffffff';
+            this.ctx.arc(city.x, city.y, radius, 0, 2 * Math.PI);
+
+            if (isSelected) {
+                this.ctx.fillStyle = '#20c997'; // Highlighted color when selected
+            } else {
+                this.ctx.fillStyle = '#1e40af'; // Default color
+            }
             this.ctx.fill();
-            this.ctx.strokeStyle = '#2d3748';
+            this.ctx.strokeStyle = '#000';
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
 
-            // Draw city label
-            this.ctx.fillStyle = '#000000';
+            // Draw labels
+            this.ctx.fillStyle = '#fff';
             this.ctx.font = '14px Arial';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
@@ -347,7 +372,5 @@ class TSPGame {
     }
 }
 
-// Initialize the game when the page loads
-window.addEventListener('load', () => {
-    new TSPGame();
-});
+// Initialize the game
+const game = new TSPGame();
